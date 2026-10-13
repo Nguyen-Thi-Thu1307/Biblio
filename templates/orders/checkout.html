@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}{{ t('checkout.title') }} - Biblio{% endblock %}
+{% block content %}
+<div class="row g-4">
+  <section class="col-lg-7">
+    <h1 class="h2 mb-4">{{ t('checkout.title') }}</h1>
+    <form class="auth-form mx-0 mt-0" method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+      <label>
+        {{ t('checkout.receiver_name') }}
+        <input type="text" name="receiver_name" maxlength="100" required value="{{ form_data.receiver_name }}" />
+      </label>
+      <label>
+        {{ t('checkout.phone') }}
+        <input type="tel" name="phone" maxlength="20" required value="{{ form_data.phone }}" />
+      </label>
+      <label>
+        {{ t('checkout.address') }}
+        <textarea name="address" maxlength="255" rows="3" required>{{ form_data.address }}</textarea>
+      </label>
+      <button class="btn" type="submit">{{ t('checkout.submit') }}</button>
+    </form>
+  </section>
+  <aside class="col-lg-5">
+    <div class="bg-white rounded shadow-sm p-4">
+      <h2 class="h5 mb-3">{{ t('checkout.summary') }}</h2>
+      {% for item in items %}
+      <div class="d-flex justify-content-between gap-3 py-2 border-bottom">
+        <span>{{ item.book.title }} <small class="text-muted">× {{ item.quantity }}</small></span>
+        <strong class="text-nowrap">{{ (item.book.price * item.quantity)|money }}</strong>
+      </div>
+      {% endfor %}
+      <div class="d-flex justify-content-between pt-3">
+        <strong>{{ t('checkout.total') }}</strong>
+        <strong>{{ total|money }}</strong>
+      </div>
+    </div>
+  </aside>
+</div>
+{% endblock %}

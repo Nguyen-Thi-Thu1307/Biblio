@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}{{ t('auth.email_required_title') }} - Biblio{% endblock %}
+{% block content %}
+<form class="auth-form" method="post">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+  <h2>{{ t('auth.email_required_title') }}</h2>
+  <p>{{ t('auth.email_required_message', provider=t('auth.' ~ provider)) }}</p>
+  <label>
+    {{ t('auth.email') }}
+    <input type="email" name="email" autocomplete="email" maxlength="120" required />
+  </label>
+  <button class="btn" type="submit">{{ t('auth.email_submit') }}</button>
+</form>
+{% endblock %}

@@ -1,0 +1,271 @@
+{% extends "base.html" %}
+
+{% block title %}{{ t('home.title') }}{% endblock %}
+{% block body_class %}home-body{% endblock %}
+
+{% block content %}
+  <div class="home-page">
+    <section class="home-hero container">
+      <div class="hero-copy">
+        <p class="eyebrow"><span></span> {{ t('home.hero_eyebrow') }}</p>
+        <h1>{{ t('home.hero_title') }}</h1>
+        <p class="hero-description">
+          {{ t('home.hero_description') }}
+        </p>
+        <div class="hero-actions">
+          <a class="button-primary" href="{{ url_for('books.list_books') }}">
+            {{ t('home.discover') }} <i class="bi bi-arrow-right" aria-hidden="true"></i>
+          </a>
+          <a class="text-link" href="#sach-moi">{{ t('home.editor_picks') }}</a>
+        </div>
+        <p class="hero-note"><i class="bi bi-heart" aria-hidden="true"></i> {{ t('home.hero_note') }}</p>
+      </div>
+      <div class="hero-visual">
+        <img
+          class="hero-image"
+          src="https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=1500&q=85"
+          alt="{{ t('home.hero_image_alt') }}"
+          fetchpriority="high"
+        />
+        <div class="hero-image-shade"></div>
+        <div class="hero-image-caption">
+          <span class="eyebrow">{{ t('home.caption_eyebrow') }}</span>
+          <strong>{{ t('home.caption_title') }}</strong>
+          <span>{{ t('home.caption_body') }}</span>
+          <i class="bi bi-arrow-up-right" aria-hidden="true"></i>
+        </div>
+        <span class="hero-image-dots" aria-hidden="true">•••</span>
+      </div>
+    </section>
+
+    <section class="benefits-strip" aria-label="{{ t('home.benefits_label') }}">
+      <div class="container benefits-grid">
+        <div class="benefit-item">
+          <i class="bi bi-book-half" aria-hidden="true"></i>
+          <div><strong>{{ t('home.benefit_info_title') }}</strong><span>{{ t('home.benefit_info_body') }}</span></div>
+        </div>
+        <div class="benefit-item">
+          <i class="bi bi-search" aria-hidden="true"></i>
+          <div><strong>{{ t('home.benefit_search_title') }}</strong><span>{{ t('home.benefit_search_body') }}</span></div>
+        </div>
+        <div class="benefit-item">
+          <i class="bi bi-box-seam" aria-hidden="true"></i>
+          <div><strong>{{ t('home.benefit_stock_title') }}</strong><span>{{ t('home.benefit_stock_body') }}</span></div>
+        </div>
+        <div class="benefit-item">
+          <i class="bi bi-bag-heart" aria-hidden="true"></i>
+          <div><strong>{{ t('home.benefit_corner_title') }}</strong><span>{{ t('home.benefit_corner_body') }}</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="home-section container category-section">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">{{ t('home.category_eyebrow') }}</p>
+          <h2>{{ t('home.category_title') }}</h2>
+        </div>
+        <a class="section-link" href="{{ url_for('books.list_books') }}">{{ t('home.all_categories') }} <i class="bi bi-arrow-right"></i></a>
+      </div>
+      <div class="category-grid">
+        {% for category in nav_categories[:6] %}
+          <a class="category-tile" href="{{ url_for('books.list_books', category=category.id) }}">
+            <i class="bi bi-{{ ['feather', 'brightness-high', 'graph-up-arrow', 'globe2', 'stars', 'flower1'][loop.index0] }}" aria-hidden="true"></i>
+            <strong>{{ category.name_en if current_lang == 'en' and category.name_en else category.name }}</strong>
+            <span>{{ t('home.category_count', count=category.books|length) }}</span>
+          </a>
+        {% else %}
+          <p class="empty-note">{{ t('header.no_categories') }}</p>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section class="home-section home-shelf-section" id="sach-moi">
+      <div class="container">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">{{ t('home.new_books_eyebrow') }}</p>
+            <h2>{{ t('home.new_books_title') }}</h2>
+          </div>
+          <a class="section-link" href="{{ url_for('books.list_books') }}">{{ t('home.view_all_books') }} <i class="bi bi-arrow-right"></i></a>
+        </div>
+        <div class="book-grid">
+          {% for book in books[:5] %}
+            <article class="home-book-card">
+              <a class="home-book-cover" href="{{ url_for('books.detail', book_id=book.id) }}">
+                {% if book.image %}
+                  <img src="{{ url_for('static', filename='images/books/' ~ book.image) }}" alt="{{ book.title }}" loading="lazy" />
+                {% else %}
+                  <span class="home-book-no-image"><i class="bi bi-book" aria-hidden="true"></i><strong>{{ book.title }}</strong><small>{{ book.author }}</small></span>
+                {% endif %}
+                {% if loop.first %}<span class="book-tag">{{ t('home.new_badge') }}</span>{% endif %}
+              </a>
+              <a class="home-book-title" href="{{ url_for('books.detail', book_id=book.id) }}">{{ book.title }}</a>
+              <span class="home-book-author">{{ book.author }}</span>
+              <div class="home-book-meta">
+                <span class="book-rating" aria-label="{{ t('home.book_label') }}"><i class="bi bi-bookmark-star" aria-hidden="true"></i>
+                  {{ book.category.name_en if current_lang == 'en' and book.category and book.category.name_en else (book.category.name if book.category else 'Biblio') }}
+                </span>
+                <strong class="home-book-price">{{ book.price|money }}</strong>
+              </div>
+              <div class="home-book-bottom">
+                <span class="home-stock">{{ t('books.stock', count=book.stock) }}</span>
+                {% if book.stock > 0 %}
+                  <form method="post" action="{{ url_for('cart.add_to_cart', book_id=book.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                    <input type="hidden" name="quantity" value="1" />
+                    <button class="book-cart-button" type="submit" aria-label="{{ t('home.add_book_to_cart', title=book.title) }}"><i class="bi bi-bag-plus" aria-hidden="true"></i></button>
+                  </form>
+                {% else %}
+                  <button class="book-cart-button" type="button" disabled aria-label="{{ t('book.out_of_stock') }}"><i class="bi bi-bag-x" aria-hidden="true"></i></button>
+                {% endif %}
+              </div>
+            </article>
+          {% else %}
+            <p class="empty-note">{{ t('home.no_books') }}</p>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+
+    {% if books|length > 5 %}
+      <section class="home-section home-featured-section">
+        <div class="container">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">{{ t('home.featured_eyebrow') }}</p>
+              <h2>{{ t('home.featured_title') }}</h2>
+            </div>
+            <a class="section-link" href="{{ url_for('books.list_books') }}">{{ t('home.discover_new_books') }} <i class="bi bi-arrow-right"></i></a>
+          </div>
+          <p class="section-intro">{{ t('home.featured_intro') }}</p>
+          <div class="book-grid featured-book-grid">
+            {% for book in books[5:] %}
+              <article class="home-book-card">
+                <a class="home-book-cover" href="{{ url_for('books.detail', book_id=book.id) }}">
+                  {% if book.image %}
+                    <img src="{{ url_for('static', filename='images/books/' ~ book.image) }}" alt="{{ book.title }}" loading="lazy" />
+                  {% else %}
+                    <span class="home-book-no-image"><i class="bi bi-book" aria-hidden="true"></i><strong>{{ book.title }}</strong><small>{{ book.author }}</small></span>
+                  {% endif %}
+                </a>
+                <a class="home-book-title" href="{{ url_for('books.detail', book_id=book.id) }}">{{ book.title }}</a>
+                <span class="home-book-author">{{ book.author }}</span>
+                <div class="home-book-meta">
+                  <span class="book-rating"><i class="bi bi-bookmark-star" aria-hidden="true"></i>
+                    {{ book.category.name_en if current_lang == 'en' and book.category and book.category.name_en else (book.category.name if book.category else 'Biblio') }}
+                  </span>
+                  <strong class="home-book-price">{{ book.price|money }}</strong>
+                </div>
+                <div class="home-book-bottom">
+                  <span class="home-stock">{{ t('books.stock', count=book.stock) }}</span>
+                  {% if book.stock > 0 %}
+                    <form method="post" action="{{ url_for('cart.add_to_cart', book_id=book.id) }}">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                      <input type="hidden" name="quantity" value="1" />
+                      <button class="book-cart-button" type="submit" aria-label="{{ t('home.add_book_to_cart', title=book.title) }}"><i class="bi bi-bag-plus" aria-hidden="true"></i></button>
+                    </form>
+                  {% else %}
+                    <button class="book-cart-button" type="button" disabled aria-label="{{ t('book.out_of_stock') }}"><i class="bi bi-bag-x" aria-hidden="true"></i></button>
+                  {% endif %}
+                </div>
+              </article>
+            {% endfor %}
+          </div>
+        </div>
+      </section>
+    {% endif %}
+
+    <section class="home-section inspiration-section" id="goc-doc">
+      <div class="container">
+        <div class="section-heading">
+          <div>
+              <p class="eyebrow">{{ t('home.inspiration_eyebrow') }}</p>
+              <h2>{{ t('home.inspiration_title') }}</h2>
+          </div>
+          <a class="section-link" href="{{ url_for('books.list_books') }}">{{ t('home.visit_biblio') }} <i class="bi bi-arrow-right"></i></a>
+        </div>
+        <div class="inspiration-grid">
+          <article class="inspiration-card">
+            <img src="https://images.unsplash.com/photo-1516979187457-637abb4f9353?auto=format&fit=crop&w=900&q=80" alt="{{ t('home.reading_image_alt') }}" loading="lazy" />
+            <div class="inspiration-content">
+                <span class="eyebrow">{{ t('home.reading_corner') }}</span>
+                <h3>{{ t('home.reading_title') }}</h3>
+                <p>{{ t('home.reading_body') }}</p>
+                <a href="{{ url_for('books.list_books') }}">{{ t('home.explore_selection') }} <i class="bi bi-arrow-right"></i></a>
+            </div>
+          </article>
+          <article class="inspiration-card">
+            <img src="https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&w=900&q=80" alt="{{ t('home.library_image_alt') }}" loading="lazy" />
+            <div class="inspiration-content">
+                <span class="eyebrow">{{ t('home.bookshelf') }}</span>
+                <h3>{{ t('home.knowledge_title') }}</h3>
+                <p>{{ t('home.knowledge_body') }}</p>
+                <a href="{{ url_for('books.list_books') }}">{{ t('home.explore_selection') }} <i class="bi bi-arrow-right"></i></a>
+            </div>
+          </article>
+          <article class="inspiration-card">
+            <img src="https://images.unsplash.com/photo-1519682337058-a94d519337bc?auto=format&fit=crop&w=900&q=80" alt="{{ t('home.reading_moment_image_alt') }}" loading="lazy" />
+            <div class="inspiration-content">
+                <span class="eyebrow">{{ t('home.reading_moment') }}</span>
+                <h3>{{ t('home.world_title') }}</h3>
+                <p>{{ t('home.world_body') }}</p>
+                <a href="{{ url_for('books.list_books') }}">{{ t('home.explore_selection') }} <i class="bi bi-arrow-right"></i></a>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="home-promo container">
+      <div class="promo-copy">
+          <p class="eyebrow">{{ t('home.promo_eyebrow') }}</p>
+          <h2>{{ t('home.promo_title') }}</h2>
+          <p>{{ t('home.promo_body') }}</p>
+          <a class="button-light" href="{{ url_for('books.list_books') }}">{{ t('home.choose_favorite') }} <i class="bi bi-arrow-right"></i></a>
+          <span class="promo-footnote">{{ t('home.promo_footnote') }}</span>
+      </div>
+      <img src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&w=1200&q=85" alt="{{ t('home.promo_image_alt') }}" loading="lazy" />
+    </section>
+
+    <section class="home-community container">
+      <div class="section-heading">
+        <div>
+            <p class="eyebrow">{{ t('home.community_eyebrow') }}</p>
+            <h2>{{ t('home.community_title') }}</h2>
+        </div>
+      </div>
+      <div class="community-grid">
+        <article class="community-card">
+          <span class="community-mark"><i class="bi bi-book-half"></i></span>
+            <h3>{{ t('home.choose_by_love') }}</h3>
+            <p>{{ t('home.choose_by_love_body') }}</p>
+            <a href="{{ url_for('books.list_books') }}">{{ t('home.find_book') }} <i class="bi bi-arrow-right"></i></a>
+        </article>
+        <article class="community-card">
+          <span class="community-mark"><i class="bi bi-search-heart"></i></span>
+            <h3>{{ t('home.easy_discovery') }}</h3>
+            <p>{{ t('home.easy_discovery_body') }}</p>
+            <a href="{{ url_for('books.list_books') }}">{{ t('home.discover') }} <i class="bi bi-arrow-right"></i></a>
+        </article>
+        <article class="community-card">
+          <span class="community-mark"><i class="bi bi-gift"></i></span>
+            <h3>{{ t('home.gift_a_world') }}</h3>
+            <p>{{ t('home.gift_a_world_body') }}</p>
+            <a href="{{ url_for('books.list_books') }}">{{ t('home.gift_book') }} <i class="bi bi-arrow-right"></i></a>
+        </article>
+      </div>
+    </section>
+
+    <section class="home-signup">
+      <div class="container signup-inner">
+        <div>
+            <p class="eyebrow">{{ t('home.signup_eyebrow') }}</p>
+            <h2>{{ t('home.signup_title') }}</h2>
+            <p>{{ t('home.signup_body') }}</p>
+        </div>
+          <a class="button-primary" href="{{ url_for('auth.register') }}">{{ t('home.create_account') }} <i class="bi bi-arrow-right"></i></a>
+      </div>
+    </section>
+  </div>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}{{ t('orders.title') }} - Biblio{% endblock %}
+{% block content %}
+<h1 class="h2 mb-4">{{ t('orders.title') }}</h1>
+{% if orders %}
+<div class="table-responsive bg-white rounded shadow-sm p-3">
+  <table class="table align-middle mb-0">
+    <thead>
+      <tr>
+        <th>{{ t('orders.number') }}</th>
+        <th>{{ t('orders.date') }}</th>
+        <th>{{ t('orders.status') }}</th>
+        <th class="text-end">{{ t('orders.total') }}</th>
+        <th><span class="visually-hidden">{{ t('orders.detail') }}</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for order in orders %}
+      <tr>
+        <td>#{{ order.id }}</td>
+        <td>{{ order.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+        <td>{{ order_statuses.get(order.status, order.status) }}</td>
+        <td class="text-end text-nowrap">{{ order.total|money }}</td>
+        <td class="text-end">
+          <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('orders.detail', order_id=order.id) }}">{{ t('orders.detail') }}</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<section class="text-center bg-white rounded shadow-sm p-5">
+  <h2 class="h4">{{ t('orders.empty_title') }}</h2>
+  <p class="text-muted">{{ t('orders.empty_message') }}</p>
+  <a class="btn" href="{{ url_for('books.list_books') }}">{{ t('orders.browse_books') }}</a>
+</section>
+{% endif %}
+{% endblock %}

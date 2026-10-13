@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% block title %}{{ t('cart.title') }} - Biblio{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+  <h1 class="h2 mb-0">{{ t('cart.title') }}</h1>
+  {% if items %}
+  <form method="post" action="{{ url_for('cart.clear_cart') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+    <button class="btn btn-outline-danger" type="submit">{{ t('cart.clear') }}</button>
+  </form>
+  {% endif %}
+</div>
+
+{% if items %}
+<div class="table-responsive bg-white rounded shadow-sm p-3">
+  <table class="table align-middle mb-0">
+    <thead>
+      <tr>
+        <th scope="col">{{ t('cart.book') }}</th>
+        <th scope="col">{{ t('cart.unit_price') }}</th>
+        <th scope="col">{{ t('cart.quantity') }}</th>
+        <th scope="col" class="text-end">{{ t('cart.subtotal') }}</th>
+        <th scope="col"><span class="visually-hidden">{{ t('cart.actions') }}</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in items %}
+      <tr>
+        <td>
+          <div class="d-flex align-items-center gap-3">
+            {% if item.book.image %}
+            <img
+              class="cart-book-image"
+              src="{{ url_for('static', filename='images/books/' ~ item.book.image) }}"
+              alt="{{ item.book.title }}"
+            />
+            {% else %}
+            <div class="cart-book-image d-flex align-items-center justify-content-center" aria-hidden="true">📖</div>
+            {% endif %}
+            <a href="{{ url_for('books.detail', book_id=item.book.id) }}">
+              {{ item.book.title }}
+            </a>
+          </div>
+        </td>
+        <td class="text-nowrap">{{ item.book.price|money }}</td>
+        <td>
+          <form
+            class="cart-quantity-form"
+            method="post"
+            action="{{ url_for('cart.update_quantity', item_id=item.id) }}"
+          >
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <button
+              class="btn btn-sm btn-outline-secondary"
+              type="submit"
+              name="quantity"
+              value="{{ item.quantity - 1 }}"
+              aria-label="{{ t('cart.decrease', title=item.book.title) }}"
+              {% if item.quantity <= 1 %}disabled{% endif %}
+            >−</button>
+            <span class="cart-quantity-value">{{ item.quantity }}</span>
+            <button
+              class="btn btn-sm btn-outline-secondary"
+              type="submit"
+              name="quantity"
+              value="{{ item.quantity + 1 }}"
+              aria-label="{{ t('cart.increase', title=item.book.title) }}"
+              {% if item.quantity >= (item.book.stock or 0) %}disabled{% endif %}
+            >+</button>
+          </form>
+        </td>
+        <td class="text-end text-nowrap fw-semibold">
+          {{ (item.book.price * item.quantity)|money }}
+        </td>
+        <td class="text-end">
+          <form
+            method="post"
+            action="{{ url_for('cart.remove_item', item_id=item.id) }}"
+          >
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <button class="btn btn-sm btn-outline-danger" type="submit">
+              {{ t('cart.remove') }}
+            </button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+    <tfoot>
+      <tr>
+        <th colspan="3" class="text-end">{{ t('cart.total') }}</th>
+        <th class="text-end text-nowrap text-danger fs-5">{{ total|money }}</th>
+        <td></td>
+      </tr>
+    </tfoot>
+  </table>
+</div>
+<div class="mt-4">
+  <a class="btn btn-outline-secondary" href="{{ url_for('books.list_books') }}">
+    {{ t('cart.continue_shopping') }}
+  </a>
+  <a class="btn ms-2" href="{{ url_for('orders.checkout') }}">
+    {{ t('cart.checkout') }}
+  </a>
+</div>
+{% else %}
+<section class="text-center bg-white rounded shadow-sm p-5">
+  <div class="display-4 mb-3" aria-hidden="true">🛒</div>
+  <h2 class="h4">{{ t('cart.empty_title') }}</h2>
+  <p class="text-muted">{{ t('cart.empty_message') }}</p>
+  <a class="btn" href="{{ url_for('books.list_books') }}">{{ t('cart.continue_shopping') }}</a>
+</section>
+{% endif %}
+{% endblock %}

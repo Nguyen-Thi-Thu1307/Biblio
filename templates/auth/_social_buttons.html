@@ -1,0 +1,9 @@
+{% if social_providers %}
+<div class="d-grid gap-2">
+  {% for provider in social_providers %}
+  <a class="btn btn-outline-secondary" href="{{ url_for('auth.oauth_login', provider=provider) }}">
+    {{ t('auth.continue_with', provider=t('auth.' ~ provider)) }}
+  </a>
+  {% endfor %}
+</div>
+{% endif %}

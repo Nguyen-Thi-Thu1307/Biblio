@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="{{ current_lang }}">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#fbf7f0" />
+    <title>{% block title %}{{ t('site.title') }}{% endblock %}</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css', v='20261013-active-nav-text') }}"
+    />
+    {% block head %}{% endblock %}
+  </head>
+  <body class="biblio-app d-flex min-vh-100 flex-column {% block body_class %}{% endblock %}">
+    {% block announcement %}
+      <div class="site-announcement home-announcement">
+        <span>{{ t('home.announcement') }}</span>
+        <span aria-hidden="true">·</span>
+        <a href="{{ url_for('books.list_books') }}">{{ t('home.announcement_link') }} <i class="bi bi-arrow-right"></i></a>
+      </div>
+    {% endblock %}
+    <header class="site-header sticky-top">
+      <nav class="navbar navbar-expand-lg navbar-light">
+        <div class="container">
+          <a class="navbar-brand site-brand" href="{{ url_for('main.home') }}">
+            <i class="bi bi-book-half" aria-hidden="true"></i> Biblio
+          </a>
+          <button
+            class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#mainNavbar"
+            aria-controls="mainNavbar"
+            aria-expanded="false"
+            aria-label="{{ t('header.menu_toggle') }}"
+          >
+            <span class="navbar-toggler-icon"></span>
+          </button>
+
+          <div class="collapse navbar-collapse" id="mainNavbar">
+            <div class="header-content">
+              <form
+                class="header-search"
+                action="{{ url_for('books.list_books') }}"
+                method="get"
+                role="search"
+              >
+                <label class="visually-hidden" for="site-search">
+                  {{ t('header.search_placeholder') }}
+                </label>
+                <input
+                  id="site-search"
+                  class="form-control"
+                  type="search"
+                  name="q"
+                  value="{{ request.args.get('q', '') }}"
+                  placeholder="{{ t('header.search_placeholder') }}"
+                  list="site-search-suggestions"
+                  data-suggestions-url="{{ url_for('books.search_suggestions') }}"
+                />
+                <datalist id="site-search-suggestions"></datalist>
+                <button
+                  class="header-search-button"
+                  type="submit"
+                  aria-label="{{ t('header.search_button') }}"
+                >
+                  <i class="bi bi-search" aria-hidden="true"></i>
+                </button>
+              </form>
+
+              <div class="header-actions">
+                <a
+                  class="header-action-control header-nav-button header-cart"
+                  href="{{ url_for('cart.view_cart') }}"
+                  aria-label="{{ t('header.cart') }}: {{ cart_count }}"
+                  title="{{ t('header.cart') }}: {{ cart_count }}"
+                >
+                  <i class="bi bi-cart3" aria-hidden="true"></i>
+                  <span>{{ t('header.cart') }}</span>
+                  <span class="badge rounded-pill header-cart-badge">
+                    {{ cart_count }}
+                  </span>
+                </a>
+
+                <div class="dropdown header-notifications">
+                  <button
+                    class="header-action-control header-nav-button"
+                    type="button"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                    aria-label="{{ t('header.notifications') }}{% if notification_count %}: {{ notification_count }}{% endif %}"
+                  >
+                    <i class="bi bi-bell" aria-hidden="true"></i>
+                    <span>{{ t('header.notifications') }}</span>
+                    {% if notification_count %}
+                    <span class="badge rounded-pill header-notification-badge">
+                      {{ notification_count }}
+                    </span>
+                    {% endif %}
+                  </button>
+                  <ul class="dropdown-menu dropdown-menu-end notification-menu">
+                    <li class="notification-menu-heading">
+                      <strong>{{ t('header.notifications') }}</strong>
+                      {% if notification_count %}
+                      <form method="post" action="{{ url_for('notifications.mark_all_read') }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                        <button type="submit">{{ t('header.mark_all_read') }}</button>
+                      </form>
+                      {% endif %}
+                    </li>
+                    {% for notification in notifications %}
+                    <li>
+                      <form
+                        class="notification-entry {% if not notification.is_read %}is-unread{% endif %}"
+                        method="post"
+                        action="{{ url_for('notifications.mark_read', notification_id=notification.id) }}"
+                      >
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                        <button type="submit">
+                          <span class="notification-entry-title">{{ notification.title }}</span>
+                          <span class="notification-entry-message">{{ notification.message }}</span>
+                          <time datetime="{{ notification.created_at.isoformat() }}">
+                            {{ notification.created_at.strftime('%d/%m/%Y %H:%M') }}
+                          </time>
+                        </button>
+                      </form>
+                    </li>
+                    {% else %}
+                    <li>
+                      <span class="dropdown-item-text text-muted">
+                        {{ t('header.empty_notifications') }}
+                      </span>
+                    </li>
+                    {% endfor %}
+                  </ul>
+                </div>
+
+                <div class="dropdown header-account">
+                  <button
+                    class="header-action-control header-nav-button"
+                    type="button"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                  >
+                    <i class="bi bi-person-circle" aria-hidden="true"></i>
+                    <span>{{ t('header.account') }}</span>
+                  </button>
+                  <ul class="dropdown-menu dropdown-menu-end">
+                    {% if current_user %}
+                    <li>
+                      <span class="dropdown-item-text fw-semibold">
+                        {{ current_user.full_name or current_user.username }}
+                      </span>
+                    </li>
+                    <li><hr class="dropdown-divider" /></li>
+                    <li>
+                      <a class="dropdown-item" href="{{ url_for('auth.profile') }}">
+                        {{ t('header.profile') }}
+                      </a>
+                    </li>
+                    <li>
+                      <a class="dropdown-item" href="{{ url_for('orders.my_orders') }}">
+                        {{ t('header.orders') }}
+                      </a>
+                    </li>
+                    {% if current_user.role == 'admin' %}
+                    <li>
+                      <a class="dropdown-item" href="{{ url_for('admin.orders') }}">
+                        {{ t('header.admin') }}
+                      </a>
+                    </li>
+                    {% endif %}
+                    <li><hr class="dropdown-divider" /></li>
+                    <li>
+                      <a class="dropdown-item" href="{{ url_for('auth.logout') }}">
+                        {{ t('header.logout') }}
+                      </a>
+                    </li>
+                    {% else %}
+                    <li>
+                      <a class="dropdown-item" href="{{ url_for('auth.login') }}">
+                        {{ t('header.login') }}
+                      </a>
+                    </li>
+                    <li>
+                      <a class="dropdown-item" href="{{ url_for('auth.register') }}">
+                        {{ t('header.register') }}
+                      </a>
+                    </li>
+                    {% endif %}
+                  </ul>
+                </div>
+
+                <div class="dropdown header-language-dropdown">
+                  <button
+                    class="header-action-control header-language"
+                    type="button"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                    aria-label="{{ t('header.language') }}"
+                  >
+                    <i class="bi bi-globe" aria-hidden="true"></i>
+                    <span>{{ current_language|upper }}</span>
+                  </button>
+                  <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                      <a
+                        class="dropdown-item {% if current_language == 'vi' %}active{% endif %}"
+                        href="{{ url_for('main.set_language', lang='vi') }}"
+                      >
+                        🇻🇳 {{ t('site.language_vi') }}
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        class="dropdown-item {% if current_language == 'en' %}active{% endif %}"
+                        href="{{ url_for('main.set_language', lang='en') }}"
+                      >
+                        🇬🇧 {{ t('site.language_en') }}
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </nav>
+      {% block header_extra %}
+        <nav class="site-secondary-nav home-secondary-nav" aria-label="{{ t('home.nav_label') }}">
+          <div class="container">
+            <div class="dropdown">
+              <button
+                class="site-nav-category home-nav-category dropdown-toggle{% if request.endpoint == 'books.list_books' and request.args.get('category') %} is-active{% endif %}"
+                type="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                <i class="bi bi-list" aria-hidden="true"></i>
+                {{ t('header.catalog') }}
+              </button>
+              <ul class="dropdown-menu">
+                {% for category in nav_categories %}
+                <li>
+                  <a class="dropdown-item" href="{{ url_for('books.list_books', category=category.id) }}">
+                    {{ category.name_en if current_lang == 'en' and category.name_en else category.name }}
+                  </a>
+                </li>
+                {% else %}
+                <li><span class="dropdown-item-text text-muted">{{ t('header.no_categories') }}</span></li>
+                {% endfor %}
+              </ul>
+            </div>
+            <div class="site-nav-links home-nav-links">
+              <a data-nav-anchor="sach-moi" href="{{ url_for('main.home', _anchor='sach-moi') }}"><i class="bi bi-stars" aria-hidden="true"></i><span>{{ t('home.nav_new_books') }}</span></a>
+              <a class="{% if request.endpoint in ('books.list_books', 'books.detail') %}is-active{% endif %}" href="{{ url_for('books.list_books') }}"><i class="bi bi-book-half" aria-hidden="true"></i><span>{{ t('home.nav_books') }}</span></a>
+              <a data-nav-anchor="goc-doc" href="{{ url_for('main.home', _anchor='goc-doc') }}"><i class="bi bi-chat-square-heart" aria-hidden="true"></i><span>{{ t('home.nav_reading') }}</span></a>
+              <a class="{% if request.endpoint == 'main.about' %}is-active{% endif %}" href="{{ url_for('main.about') }}"><i class="bi bi-info-circle" aria-hidden="true"></i><span>{{ t('home.nav_about') }}</span></a>
+            </div>
+            <a class="site-nav-note home-nav-note" href="{{ url_for('auth.register') }}">
+              <i class="bi bi-gift" aria-hidden="true"></i>
+              {{ t('home.gift') }}
+            </a>
+          </div>
+        </nav>
+      {% endblock %}
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      <div class="container pt-3" aria-live="polite">
+        {% for category, message in messages %}
+        <div
+          class="alert alert-{{ {'success': 'success', 'error': 'danger', 'warning': 'warning', 'info': 'info'}.get(category, 'secondary') }} mb-2"
+          role="alert"
+        >
+          {{ message }}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    {% endwith %}
+
+    <main class="container py-4 flex-grow-1">
+      {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer home-footer mt-auto">
+      <div class="container footer-main">
+        <div class="footer-brand-column">
+          <a class="footer-brand" id="footer-biblio" href="{{ url_for('main.home') }}"><i class="bi bi-book-half" aria-hidden="true"></i> Biblio</a>
+          <p>{{ t('home.footer_brand_body') }}</p>
+        </div>
+        <div class="footer-link-column">
+          <strong>{{ t('home.footer_explore') }}</strong>
+          <a href="{{ url_for('main.about') }}">{{ t('home.footer_about') }}</a>
+          <a href="{{ url_for('books.list_books') }}">{{ t('home.nav_books') }} Biblio</a>
+          <a href="{{ url_for('main.home', _anchor='sach-moi') }}">{{ t('home.nav_new_books') }}</a>
+          <a href="{{ url_for('books.list_books') }}">{{ t('header.catalog') }}</a>
+        </div>
+        <div class="footer-link-column">
+          <strong>{{ t('home.footer_support') }}</strong>
+          <span>{{ t('home.footer_buying_guide') }}</span>
+          <span>{{ t('home.footer_shipping') }}</span>
+          <span>{{ t('home.footer_returns') }}</span>
+          <span>{{ t('home.footer_payment') }}</span>
+          <a href="{{ url_for('main.privacy_policy') }}">{{ t('legal.privacy.link') }}</a>
+          <a href="{{ url_for('main.terms') }}">{{ t('legal.terms.link') }}</a>
+        </div>
+        <div class="footer-link-column">
+          <strong>{{ t('home.footer_connect') }}</strong>
+          <a href="mailto:hello@biblio.vn">hello@biblio.vn</a>
+          <a href="tel:0123456789">0123 456 789</a>
+          <a
+            href="https://www.google.com/maps/search/?api=1&amp;query=207%20Gi%E1%BA%A3i%20Ph%C3%B3ng%2C%20Ph%C6%B0%E1%BB%9Dng%20B%E1%BA%A1ch%20Mai%2C%20TP.%20H%C3%A0%20N%E1%BB%99i"
+            target="_blank"
+            rel="noopener noreferrer"
+          >{{ t('home.footer_address') }}</a>
+          <div class="footer-socials" aria-label="{{ t('home.footer_social_label') }}">
+            <a href="https://www.facebook.com/" target="_blank" rel="noopener noreferrer" aria-label="Facebook" title="Facebook"><i class="bi bi-facebook" aria-hidden="true"></i></a>
+            <a href="https://zalo.me/" target="_blank" rel="noopener noreferrer" aria-label="Zalo" title="Zalo"><i class="bi bi-chat-dots-fill" aria-hidden="true"></i></a>
+            <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" title="Instagram"><i class="bi bi-instagram" aria-hidden="true"></i></a>
+          </div>
+        </div>
+      </div>
+      <div class="container footer-bottom">
+        <small>{{ t('footer.copyright') }}</small>
+        <a href="{{ url_for('books.list_books') }}">{{ t('home.footer_next_book') }} <i class="bi bi-arrow-up-right"></i></a>
+      </div>
+    </footer>
+
+    <div class="chatbot-widget" data-chatbot>
+      <section
+        class="chatbot-panel"
+        id="chatbot-panel"
+        data-chatbot-panel
+        aria-labelledby="chatbot-title"
+        hidden
+      >
+        <header class="chatbot-header">
+          <div>
+            <h2 id="chatbot-title">{{ t('chatbot.title') }}</h2>
+              <p>{{ t('chatbot.subtitle') }}</p>
+          </div>
+            <button class="chatbot-close" type="button" data-chatbot-close aria-label="{{ t('chatbot.close') }}">
+            <i class="bi bi-x-lg" aria-hidden="true"></i>
+          </button>
+        </header>
+        <div class="chatbot-messages" data-chatbot-messages role="log" aria-live="polite" aria-relevant="additions">
+          <div class="chatbot-message chatbot-message-assistant">
+            {{ t('chatbot.greeting') }}
+          </div>
+          <div class="chatbot-suggestions" aria-label="{{ t('chatbot.suggestions_label') }}">
+            <button type="button" data-chatbot-prompt="{{ t('chatbot.prompt_skills') }}">{{ t('chatbot.skills') }}</button>
+            <button type="button" data-chatbot-prompt="{{ t('chatbot.prompt_history') }}">{{ t('chatbot.history') }}</button>
+          </div>
+        </div>
+        <form
+          class="chatbot-form"
+          data-chatbot-form
+          data-endpoint="{{ url_for('chatbot.message') }}"
+          data-pending-message="{{ t('chatbot.pending') }}"
+          data-error-message="{{ t('chatbot.error') }}"
+        >
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+          <label class="visually-hidden" for="chatbot-input">{{ t('chatbot.input_label') }}</label>
+          <input
+            id="chatbot-input"
+            name="message"
+            type="text"
+            maxlength="240"
+            autocomplete="off"
+            placeholder="{{ t('chatbot.input_placeholder') }}"
+            required
+          />
+          <button type="submit" aria-label="{{ t('chatbot.send') }}">
+            <i class="bi bi-arrow-up" aria-hidden="true"></i>
+          </button>
+        </form>
+      </section>
+      <button
+        class="chatbot-toggle"
+        type="button"
+        data-chatbot-toggle
+        aria-controls="chatbot-panel"
+        aria-expanded="false"
+        aria-label="{{ t('chatbot.open') }}"
+        title="{{ t('chatbot.title') }}"
+      >
+        <i class="bi bi-chat-dots-fill" aria-hidden="true"></i>
+      </button>
+    </div>
+
+    <a
+      class="hotline-float"
+      href="tel:0123456789"
+      aria-label="{{ t('hotline.label') }}"
+      title="{{ t('hotline.label') }}"
+    >
+      <i class="bi bi-telephone-fill" aria-hidden="true"></i>
+    </a>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+      crossorigin="anonymous"
+    ></script>
+    <script src="{{ url_for('static', filename='js/search.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/chatbot.js') }}" defer></script>
+    <script>
+      (() => {
+        const navLinks = document.querySelectorAll(".site-nav-links a[data-nav-anchor]");
+        const updateActiveLink = () => {
+          const activeLink = [...navLinks].find((link) => link.dataset.navAnchor === window.location.hash.slice(1));
+          if (!activeLink) return;
+          document.querySelectorAll(".site-nav-links a").forEach((link) => link.classList.remove("is-active"));
+          activeLink.classList.add("is-active");
+        };
+        updateActiveLink();
+        window.addEventListener("hashchange", updateActiveLink);
+      })();
+    </script>
+    {% block scripts %}{% endblock %}
+  </body>
+</html>

@@ -1,0 +1,62 @@
+{% extends "base.html" %} {% block title %}{{ book.title }} - Biblio{% endblock
+%} {% block content %}
+<div class="detail">
+  <div class="detail-img">
+    {% if book.image %}
+    <img
+      src="{{ url_for('static', filename='images/books/' ~ book.image) }}"
+      alt="{{ book.title }}"
+    />
+    {% else %}
+    <div class="no-image big">📖</div>
+    {% endif %}
+  </div>
+  <div class="detail-info">
+    <h2>{{ book.title }}</h2>
+    <p><strong>{{ t('book.author') }}:</strong> {{ book.author }}</p>
+    <p>
+      <strong>{{ t('book.publisher') }}:</strong> {{ book.publisher or t('book.publisher_missing') }}
+    </p>
+    <p>
+      <strong>{{ t('book.category') }}:</strong>
+      {% if book.category %}
+        {{ book.category.name_en if current_lang == 'en' and book.category.name_en else book.category.name }}
+      {% else %}
+        {{ t('book.category_missing') }}
+      {% endif %}
+    </p>
+    <p class="price big">{{ book.price|money }}</p>
+    <p><strong>{{ t('book.stock_left') }}:</strong> {{ t('books.stock', count=book.stock) }}</p>
+    <p class="desc">
+      {{ (book.description_en if current_lang == 'en' and book.description_en else book.description) or t('book.description_missing') }}
+    </p>
+
+    {% if book.stock > 0 %}
+    <form
+      class="detail-cart-form"
+      method="post"
+      action="{{ url_for('cart.add_to_cart', book_id=book.id) }}"
+    >
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+      <label for="quantity" class="form-label">{{ t('book.quantity') }}</label>
+      <div class="input-group mb-3" style="max-width: 14rem">
+        <input
+          class="form-control"
+          id="quantity"
+          type="number"
+          name="quantity"
+          value="1"
+          min="1"
+          max="{{ book.stock }}"
+          required
+        />
+        <button class="btn" type="submit">{{ t('book.add_to_cart') }}</button>
+      </div>
+    </form>
+    {% else %}
+    <button class="btn" disabled>{{ t('book.out_of_stock') }}</button>
+    {% endif %}
+    <p><a href="{{ url_for('books.list_books') }}">{{ t('book.back_to_list') }}</a></p>
+  </div>
+</div>
+{% endblock %}

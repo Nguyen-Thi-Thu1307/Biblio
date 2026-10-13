@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}{{ t('auth.profile_title') }} - Biblio{% endblock %}
+{% block content %}
+<form class="auth-form" method="post">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+  <h2>{{ t('auth.profile_title') }}</h2>
+  <label>
+    {{ t('auth.full_name') }}
+    <input
+      type="text"
+      name="full_name"
+      value="{{ form_data.full_name }}"
+      maxlength="100"
+      autocomplete="name"
+      placeholder="{{ t('auth.full_name_placeholder') }}"
+    />
+  </label>
+  <label>
+    {{ t('auth.username') }}
+    <input
+      type="text"
+      name="username"
+      value="{{ form_data.username }}"
+      maxlength="50"
+      autocomplete="username"
+      placeholder="{{ t('auth.username_placeholder') }}"
+      required
+    />
+  </label>
+  <label>
+    {{ t('auth.email') }}
+    <input
+      type="email"
+      id="profile-email"
+      name="email"
+      value="{{ form_data.email }}"
+      maxlength="120"
+      autocomplete="email"
+      placeholder="{{ t('auth.email_placeholder') }}"
+      aria-describedby="profile-email-error"
+      required
+    />
+    <small id="profile-email-error" class="auth-field-error" hidden>
+      {{ t('flash.email_invalid') }}
+    </small>
+  </label>
+  <button class="btn" type="submit">{{ t('auth.save_profile') }}</button>
+  <p><a href="{{ url_for('main.home') }}">{{ t('auth.profile_cancel') }}</a></p>
+</form>
+<section class="auth-form mt-4" aria-labelledby="linked-accounts-title">
+  <h2 id="linked-accounts-title">{{ t('auth.linked_accounts') }}</h2>
+  {% for account in current_user.social_accounts %}
+  <div class="d-flex align-items-center justify-content-between gap-3">
+    <span>{{ t('auth.' ~ account.provider) }}{% if account.email %} — {{ account.email }}{% endif %}</span>
+    <form method="post" action="{{ url_for('auth.unlink_social_account', account_id=account.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+      <button class="btn btn-outline-danger" type="submit">{{ t('auth.unlink_account') }}</button>
+    </form>
+  </div>
+  {% else %}
+  <p>{{ t('auth.no_linked_accounts') }}</p>
+  {% endfor %}
+  {% for provider in social_providers %}
+    {% if provider not in current_user.social_accounts|map(attribute='provider')|list %}
+    <a class="btn btn-outline-secondary" href="{{ url_for('auth.oauth_login', provider=provider) }}">
+      {{ t('auth.link_with', provider=t('auth.' ~ provider)) }}
+    </a>
+    {% endif %}
+  {% endfor %}
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+  const profileEmail = document.getElementById("profile-email");
+  const profileEmailError = document.getElementById("profile-email-error");
+
+  profileEmail.addEventListener("input", () => {
+    const isInvalid = Boolean(profileEmail.value) && !profileEmail.validity.valid;
+    profileEmailError.hidden = !isInvalid;
+    profileEmail.setAttribute("aria-invalid", String(isInvalid));
+  });
+</script>
+{% endblock %}

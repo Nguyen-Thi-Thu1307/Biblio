@@ -1,0 +1,39 @@
+{% extends "base.html" %} {% block title %}{{ t('books.title') }} - Biblio{% endblock %}
+{% block content %}
+<h2>{{ t('books.title') }}</h2>
+
+<form class="filters" method="get">
+  <input
+    type="text"
+    name="q"
+    value="{{ q }}"
+    placeholder="{{ t('books.search_placeholder') }}"
+  />
+  <select name="category">
+    <option value="">{{ t('books.all_categories') }}</option>
+    {% for c in categories %}
+    <option value="{{ c.id }}" {% if c.id == category_id %}selected{% endif %}>
+      {{ c.name_en if current_lang == 'en' and c.name_en else c.name }}
+    </option>
+    {% endfor %}
+  </select>
+  <select name="sort">
+    <option value="name_asc" {% if sort == "name_asc" %}selected{% endif %}>
+      {{ t('books.sort_name') }}
+    </option>
+    <option value="price_asc" {% if sort == "price_asc" %}selected{% endif %}>
+      {{ t('books.sort_price_asc') }}
+    </option>
+    <option value="price_desc" {% if sort == "price_desc" %}selected{% endif %}>
+      {{ t('books.sort_price_desc') }}
+    </option>
+  </select>
+  <button type="submit">{{ t('books.filter') }}</button>
+</form>
+
+<div class="grid">
+  {% for book in books %} {% include "_book_card.html" %} {% else %}
+  <p>{{ t('books.no_results') }}</p>
+  {% endfor %}
+</div>
+{% endblock %}

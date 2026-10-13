@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}{{ t('orders.number') }}{{ order.id }} - Biblio{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+  <div>
+    <p class="text-muted mb-1">{{ t('orders.number') }}{{ order.id }}</p>
+    <h1 class="h2 mb-0">{{ order_statuses.get(order.status, order.status) }}</h1>
+  </div>
+  <a class="btn btn-outline-secondary" href="{{ url_for('orders.my_orders') }}">{{ t('orders.history') }}</a>
+</div>
+<div class="row g-4">
+  <section class="col-lg-7">
+    <div class="bg-white rounded shadow-sm p-4">
+      <h2 class="h5 mb-3">{{ t('orders.books_in_order') }}</h2>
+      {% for item in order.items %}
+      <div class="d-flex justify-content-between gap-3 py-3 border-bottom">
+        <div>
+          <a href="{{ url_for('books.detail', book_id=item.book_id) }}">{{ item.book.title }}</a>
+          <div class="small text-muted">{{ item.unit_price|money }} × {{ item.quantity }}</div>
+        </div>
+        <strong class="text-nowrap">{{ (item.unit_price * item.quantity)|money }}</strong>
+      </div>
+      {% endfor %}
+      <div class="d-flex justify-content-between pt-3">
+        <strong>{{ t('checkout.total') }}</strong>
+        <strong>{{ order.total|money }}</strong>
+      </div>
+    </div>
+  </section>
+  <aside class="col-lg-5">
+    <div class="bg-white rounded shadow-sm p-4">
+      <h2 class="h5 mb-3">{{ t('orders.shipping_info') }}</h2>
+      <p class="mb-1">{{ order.receiver_name }}</p>
+      <p class="mb-1">{{ order.phone }}</p>
+      <p class="mb-0">{{ order.address }}</p>
+      <hr />
+      <small class="text-muted">{{ t('orders.placed_at', date=order.created_at.strftime('%d/%m/%Y %H:%M')) }}</small>
+    </div>
+  </aside>
+</div>
+{% endblock %}

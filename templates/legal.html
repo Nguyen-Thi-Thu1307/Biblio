@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}{{ t(title_key) }} - Biblio{% endblock %}
+{% block content %}
+<article class="legal-page">
+  <h1>{{ t(title_key) }}</h1>
+  {% for heading_key, body_key in sections %}
+  <section class="mb-4">
+    <h2 class="h4">{{ t(heading_key) }}</h2>
+    <p>{{ t(body_key) }}</p>
+  </section>
+  {% endfor %}
+</article>
+{% endblock %}

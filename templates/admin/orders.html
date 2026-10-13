@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}{{ t('admin.orders_title') }} - Biblio{% endblock %}
+{% block content %}
+<h1 class="h2 mb-4">{{ t('admin.orders_title') }}</h1>
+{% if orders %}
+<div class="table-responsive bg-white rounded shadow-sm p-3">
+  <table class="table align-middle mb-0">
+    <thead>
+      <tr>
+        <th>{{ t('orders.number') }}</th>
+        <th>{{ t('admin.customer') }}</th>
+        <th>{{ t('orders.date') }}</th>
+        <th>{{ t('orders.total') }}</th>
+        <th>{{ t('orders.status') }}</th>
+        <th>{{ t('admin.update') }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for order in orders %}
+      <tr>
+        <td><a href="{{ url_for('admin.orders') }}">#{{ order.id }}</a></td>
+        <td>{{ order.receiver_name }}<small class="d-block text-muted">{{ order.phone }}</small></td>
+        <td>{{ order.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+        <td class="text-nowrap">{{ order.total|money }}</td>
+        <td>{{ order_statuses.get(order.status, order.status) }}</td>
+        <td>
+          <form class="d-flex gap-2" method="post" action="{{ url_for('admin.update_order_status', order_id=order.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <label class="visually-hidden" for="status-{{ order.id }}">{{ t('admin.status_label', order_id=order.id) }}</label>
+            <select class="form-select form-select-sm" id="status-{{ order.id }}" name="status">
+              {% for value, label in order_statuses.items() %}
+              <option value="{{ value }}" {% if order.status == value %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+            <button class="btn btn-sm" type="submit">{{ t('admin.save') }}</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<p class="text-muted">{{ t('admin.empty_orders') }}</p>
+{% endif %}
+{% endblock %}

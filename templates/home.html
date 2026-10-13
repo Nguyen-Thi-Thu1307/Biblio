@@ -1,0 +1,14 @@
+{% extends "base.html" %} {% block content %}
+<section class="hero">
+  <h2>{{ t('home.welcome') }}</h2>
+  <p>{{ t('home.tagline') }}</p>
+  <a class="btn" href="{{ url_for('books.list_books') }}">{{ t('home.all_books') }}</a>
+</section>
+
+<h2>{{ t('home.new_books') }}</h2>
+<div class="grid">
+  {% for book in books %} {% include "_book_card.html" %} {% else %}
+  <p>{{ t('home.no_books') }}</p>
+  {% endfor %}
+</div>
+{% endblock %}

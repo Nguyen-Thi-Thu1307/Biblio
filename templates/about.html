@@ -1,0 +1,265 @@
+{% extends "base.html" %}
+{% block title %}{{ t('about.title') }} - Biblio{% endblock %}
+{% block content %}
+<div class="about-page">
+  <header class="about-banner">
+    <p class="about-eyebrow">{{ t('about.banner_eyebrow') }}</p>
+    <h1>{{ t('about.banner_title') }}</h1>
+    <p>{{ t('about.banner_intro') }}</p>
+  </header>
+
+  <section class="about-section about-story" aria-labelledby="about-story-heading">
+    <div class="about-story-mark" aria-hidden="true"><i class="bi bi-book-half"></i></div>
+    <div>
+      <h2 id="about-story-heading">{{ t('about.story_heading') }}</h2>
+      <p>{{ t('about.story_paragraph_1') }}</p>
+      <p>{{ t('about.story_paragraph_2') }}</p>
+      <p>{{ t('about.story_paragraph_3') }}</p>
+    </div>
+  </section>
+
+  <section class="about-section" aria-labelledby="about-goals-heading">
+    <div class="about-section-heading">
+      <p class="about-eyebrow">Biblio</p>
+      <h2 id="about-goals-heading">{{ t('about.goals_heading') }}</h2>
+    </div>
+    <div class="row g-3">
+      {% set goal_icons = ['bi-compass', 'bi-eye', 'bi-bag-check', 'bi-lightbulb'] %}
+      {% for goal_number in range(1, 5) %}
+      <div class="col-sm-6 col-xl-3">
+        <article class="about-goal h-100">
+          <i class="bi {{ goal_icons[loop.index0] }}" aria-hidden="true"></i>
+          <h3>{{ t('about.goal_' ~ goal_number ~ '_title') }}</h3>
+          <p>{{ t('about.goal_' ~ goal_number ~ '_body') }}</p>
+        </article>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="about-section about-purpose" aria-label="{{ t('about.mission_heading') }}, {{ t('about.vision_heading') }}, {{ t('about.values_heading') }}">
+    <div class="about-purpose-grid">
+      <article class="about-purpose-item">
+        <h2 id="about-mission-heading">{{ t('about.mission_heading') }}</h2>
+        <p>{{ t('about.mission_body') }}</p>
+      </article>
+      <article class="about-purpose-item">
+        <h2 id="about-vision-heading">{{ t('about.vision_heading') }}</h2>
+        <p>{{ t('about.vision_body') }}</p>
+      </article>
+    </div>
+    <div class="about-values" aria-labelledby="about-values-heading">
+      <h2 id="about-values-heading">{{ t('about.values_heading') }}</h2>
+      <div class="row g-3">
+        {% set value_icons = ['bi-patch-check', 'bi-eye', 'bi-heart', 'bi-book-half'] %}
+        {% for value_number in range(1, 5) %}
+        <div class="col-sm-6 col-xl-3">
+          <article class="about-goal about-value h-100">
+            <i class="bi {{ value_icons[loop.index0] }}" aria-hidden="true"></i>
+            <h3>{{ t('about.value_' ~ value_number ~ '_title') }}</h3>
+            <p>{{ t('about.value_' ~ value_number ~ '_body') }}</p>
+          </article>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <section class="about-section" aria-labelledby="about-catalog-heading">
+    <div class="about-section-heading">
+      <p class="about-eyebrow">Biblio</p>
+      <h2 id="about-catalog-heading">{{ t('about.catalog_heading') }}</h2>
+    </div>
+    <div class="row g-3">
+      {% set catalog_icons = ['bi-book-half', 'bi-graph-up-arrow', 'bi-person-hearts', 'bi-balloon-heart', 'bi-translate', 'bi-cpu'] %}
+      {% set catalog_category_keys = [
+        ['Literature'],
+        ['Economics'],
+        ['Personal Development'],
+        ["Children's Books"],
+        ['Foreign Languages'],
+        ['Technology', 'Science']
+      ] %}
+      {% for category_number in range(1, 7) %}
+      <div class="col-sm-6 col-xl-4">
+        <article class="about-goal about-catalog-item h-100">
+          <i class="bi {{ catalog_icons[loop.index0] }}" aria-hidden="true"></i>
+          <h3>{{ t('about.catalog_' ~ category_number ~ '_title') }}</h3>
+          <p>{{ t('about.catalog_' ~ category_number ~ '_body') }}</p>
+          <div class="about-catalog-links">
+            {% for category_key in catalog_category_keys[loop.index0] %}
+              {% set linked_category = catalog_categories.get(category_key) %}
+              {% if linked_category %}
+              <a href="{{ url_for('books.list_books', category=linked_category.id) }}">
+                {{ t('about.catalog_browse') }} {{ linked_category.name_en if current_lang == 'en' and linked_category.name_en else linked_category.name }}
+                <i class="bi bi-arrow-up-right" aria-hidden="true"></i>
+              </a>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </article>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="about-section" aria-labelledby="about-services-heading">
+    <div class="about-section-heading">
+      <p class="about-eyebrow">Biblio</p>
+      <h2 id="about-services-heading">{{ t('about.services_heading') }}</h2>
+    </div>
+    <ol class="about-service-list">
+      {% for service_number in range(1, 6) %}
+      <li>
+        <strong>{{ t('about.service_' ~ service_number ~ '_title') }}</strong>
+        <span>{{ t('about.service_' ~ service_number ~ '_body') }}</span>
+      </li>
+      {% endfor %}
+    </ol>
+  </section>
+
+  <section class="about-section" aria-labelledby="about-features-heading">
+    <div class="about-section-heading">
+      <p class="about-eyebrow">Biblio</p>
+      <h2 id="about-features-heading">{{ t('about.features_heading') }}</h2>
+    </div>
+    <div class="table-responsive">
+      <table class="table about-feature-table align-middle mb-0">
+        <thead>
+          <tr>
+            <th scope="col">{{ t('about.feature_name_heading') }}</th>
+            <th scope="col">{{ t('about.feature_description_heading') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for feature_number in range(1, 8) %}
+          <tr>
+            <th scope="row">{{ t('about.feature_' ~ feature_number ~ '_name') }}</th>
+            <td>{{ t('about.feature_' ~ feature_number ~ '_body') }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="about-section" aria-labelledby="about-technology-heading">
+    <div class="about-section-heading">
+      <p class="about-eyebrow">Biblio</p>
+      <h2 id="about-technology-heading">{{ t('about.technology_heading') }}</h2>
+    </div>
+    <div class="about-tech-list">
+      {% for technology_key in ['about.tech_python', 'about.tech_flask', 'about.tech_sqlite', 'about.tech_sqlalchemy', 'about.tech_bootstrap', 'about.tech_jinja', 'about.tech_javascript'] %}
+      <span class="badge about-tech-badge">{{ t(technology_key) }}</span>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="about-section" aria-labelledby="about-team-heading">
+    <div class="about-section-heading">
+      <p class="about-eyebrow">Biblio</p>
+      <h2 id="about-team-heading">{{ t('about.team_heading') }}</h2>
+      <p>{{ t('about.team_intro') }}</p>
+    </div>
+    <div class="row g-3 justify-content-center">
+      {% set team_member_images = [
+        'Nguyễn Thị Thu - Trưởng nhóm.jpg',
+        'Hồ Thị Thuỳ Linh - Thành viên (2).jpg',
+        'Hoàng Xuân Đạt - Thành viên (1).jpg'
+      ] %}
+      {% for member_number in range(1, 4) %}
+      <div class="col-sm-6 col-xl-3">
+        <article class="about-member h-100">
+          <img
+            class="about-avatar"
+            src="{{ url_for('static', filename=team_member_images[loop.index0]) }}"
+            alt="{{ t('about.team_member_' ~ member_number ~ '_name') }}"
+            loading="lazy"
+          />
+          <h3>{{ t('about.team_member_' ~ member_number ~ '_name') }}</h3>
+          <p>{{ t('about.team_role_leader' if member_number == 1 else 'about.team_role_member') }}</p>
+        </article>
+      </div>
+      {% endfor %}
+    </div>
+    <p class="about-advisor-line">{{ t('about.advisor_role') }}: {{ t('about.advisor_name') }}</p>
+  </section>
+
+  <section class="about-section" aria-labelledby="about-location-heading">
+    <div class="about-section-heading">
+      <p class="about-eyebrow">Biblio</p>
+      <h2 id="about-location-heading">{{ t('about.location_heading') }}</h2>
+      <p>{{ t('about.location_address') }}</p>
+    </div>
+    <div class="about-map-frame">
+      <iframe
+        title="{{ t('about.map_title') }}"
+        src="https://www.google.com/maps?q=National+Economics+University,+207+Giai+Phong,+Hanoi&output=embed"
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade"
+        allowfullscreen
+      ></iframe>
+    </div>
+  </section>
+
+  <section class="about-section about-contact" id="contact" aria-labelledby="about-contact-heading">
+    <div>
+      <p class="about-eyebrow">Biblio</p>
+      <h2 id="about-contact-heading">{{ t('about.contact_heading') }}</h2>
+      <p>{{ t('about.contact_intro') }}</p>
+    </div>
+    <form class="about-contact-form" method="post" action="{{ url_for('main.about', _anchor='contact') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+      <div>
+        <label class="form-label" for="contact-name">{{ t('about.contact_name') }}</label>
+        <input
+          class="form-control"
+          id="contact-name"
+          name="name"
+          type="text"
+          maxlength="100"
+          autocomplete="name"
+          placeholder="{{ t('about.contact_name_placeholder') }}"
+          value="{{ form_data.name }}"
+          required
+        />
+      </div>
+      <div>
+        <label class="form-label" for="contact-email">{{ t('about.contact_email') }}</label>
+        <input
+          class="form-control"
+          id="contact-email"
+          name="email"
+          type="email"
+          maxlength="120"
+          autocomplete="email"
+          placeholder="{{ t('about.contact_email_placeholder') }}"
+          value="{{ form_data.email }}"
+          required
+        />
+      </div>
+      <div>
+        <label class="form-label" for="contact-message">{{ t('about.contact_message') }}</label>
+        <textarea
+          class="form-control"
+          id="contact-message"
+          name="message"
+          rows="5"
+          maxlength="2000"
+          placeholder="{{ t('about.contact_message_placeholder') }}"
+          required
+        >{{ form_data.message }}</textarea>
+      </div>
+      <button class="btn" type="submit">{{ t('about.contact_submit') }}</button>
+    </form>
+  </section>
+
+  <aside class="about-note" aria-labelledby="about-note-heading">
+    <i class="bi bi-heart-fill" aria-hidden="true"></i>
+    <div>
+      <h2 id="about-note-heading">{{ t('about.note_heading') }}</h2>
+      <p>{{ t('about.note_body') }}</p>
+    </div>
+  </aside>
+</div>
+{% endblock %}

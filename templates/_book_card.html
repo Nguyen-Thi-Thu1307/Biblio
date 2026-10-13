@@ -1,0 +1,35 @@
+<article class="card book-card">
+  <a class="book-card-link" href="{{ url_for('books.detail', book_id=book.id) }}">
+  {% if book.image %}
+  <img
+    src="{{ url_for('static', filename='images/books/' ~ book.image) }}"
+    alt="{{ book.title }}"
+  />
+  {% else %}
+  <div class="no-image">📖</div>
+  {% endif %}
+  <h3>{{ book.title }}</h3>
+  <p class="author">{{ book.author }}</p>
+  <p class="price">{{ book.price|money }}</p>
+  <p class="meta">
+    {% if book.category %}
+      {{ book.category.name_en if current_lang == 'en' and book.category.name_en else book.category.name }}
+      ·
+    {% endif %}
+    {{ t('books.stock', count=book.stock) }}
+  </p>
+  </a>
+  {% if book.stock > 0 %}
+  <form
+    class="book-card-cart"
+    method="post"
+    action="{{ url_for('cart.add_to_cart', book_id=book.id) }}"
+  >
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+    <input type="hidden" name="quantity" value="1" />
+    <button class="btn btn-sm w-100" type="submit">{{ t('book.add_to_cart') }}</button>
+  </form>
+  {% else %}
+  <button class="btn btn-sm w-100" type="button" disabled>{{ t('book.out_of_stock') }}</button>
+  {% endif %}
+</article>

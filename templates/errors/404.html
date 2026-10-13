@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}{{ t('error.not_found_title') }} - Biblio{% endblock %}
+{% block content %}
+<section class="text-center bg-white rounded shadow-sm p-5">
+  <p class="display-1 fw-bold text-warning">404</p>
+  <h1 class="h3">{{ t('error.not_found_title') }}</h1>
+  <p class="text-muted">{{ t('error.not_found_message') }}</p>
+  <a class="btn" href="{{ url_for('main.home') }}">{{ t('error.home') }}</a>
+</section>
+{% endblock %}

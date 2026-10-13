@@ -1,0 +1,17 @@
+{% extends "base.html" %} {% block title %}{{ t('auth.register_title') }} - Biblio{% endblock %} {%
+block content %}
+<form class="auth-form" method="post">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+  <h2>{{ t('auth.register_title') }}</h2>
+  <label>{{ t('auth.full_name') }} <input type="text" name="full_name" autocomplete="name" /></label>
+  <label>{{ t('auth.username') }} <input type="text" name="username" autocomplete="username" required /></label>
+  <label>{{ t('auth.email') }} <input type="email" name="email" autocomplete="email" required /></label>
+  <label>{{ t('auth.password') }} <input type="password" name="password" autocomplete="new-password" required /></label>
+  <label
+    >{{ t('auth.confirm_password') }} <input type="password" name="confirm" autocomplete="new-password" required
+  /></label>
+  <button class="btn" type="submit">{{ t('auth.register_button') }}</button>
+  {% include "auth/_social_buttons.html" %}
+  <p>{{ t('auth.has_account') }} <a href="{{ url_for('auth.login') }}">{{ t('auth.login_button') }}</a></p>
+</form>
+{% endblock %}
